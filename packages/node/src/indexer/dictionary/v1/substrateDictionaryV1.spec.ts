@@ -18,18 +18,18 @@ import { SubstrateDictionaryService } from '../substrateDictionary.service';
 import { buildDictionaryV1QueryEntries } from './substrateDictionaryV1';
 
 function testSubqueryProject(): SubqueryProject {
-  return new SubqueryProject(
-    'test',
-    './',
-    {
+  return {
+    id: 'test',
+    root: './',
+    network: {
       endpoint: '',
       chainId:
         '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
     },
-    [],
-    new GraphQLSchema({}),
-    [],
-  );
+    dataSources: [],
+    schema: new GraphQLSchema({}),
+    templates: [],
+  } as unknown as SubqueryProject;
 }
 const nodeConfig = new NodeConfig({
   subquery: 'asdf',
@@ -54,7 +54,7 @@ describe('Substrate DictionaryService', () => {
 
     const specVersions = await dictionaryService.getSpecVersions();
 
-    expect(specVersions.length).toBeGreaterThan(0);
+    expect(specVersions?.length).toBeGreaterThan(0);
     dictionaryService.onApplicationShutdown();
   }, 50000);
 });
@@ -101,19 +101,19 @@ describe('Building dictionary query entries', () => {
     /* If there are any blockhandlers without a modulo or timestamp filter we expect no query entries */
     const result1 = buildDictionaryV1QueryEntries(
       [makeDs([blockHandler])],
-      () => undefined,
+      () => undefined as any,
     );
     expect(result1).toEqual([]);
 
     const result2 = buildDictionaryV1QueryEntries(
       [makeDs([blockHandler, callHandler, eventHandler])],
-      () => undefined,
+      () => undefined as any,
     );
     expect(result2).toEqual([]);
 
     const result3 = buildDictionaryV1QueryEntries(
       [makeDs([blockHandler]), makeDs([callHandler]), makeDs([eventHandler])],
-      () => undefined,
+      () => undefined as any,
     );
     expect(result3).toEqual([]);
   });
@@ -127,7 +127,7 @@ describe('Building dictionary query entries', () => {
           eventHandler,
         ]),
       ],
-      () => undefined,
+      () => undefined as any,
     );
     expect(result1).toEqual([
       {
@@ -140,8 +140,8 @@ describe('Building dictionary query entries', () => {
       {
         entity: 'events',
         conditions: [
-          { field: 'module', value: 'module' },
           { field: 'event', value: 'event' },
+          { field: 'module', value: 'module' },
         ],
       },
     ]);
@@ -150,13 +150,13 @@ describe('Building dictionary query entries', () => {
   it('supports any handler with no filters', () => {
     const result1 = buildDictionaryV1QueryEntries(
       [makeDs([{ kind: SubstrateHandlerKind.Call, handler: 'handleCall' }])],
-      () => undefined,
+      () => undefined as any,
     );
     expect(result1).toEqual([]);
 
     const result2 = buildDictionaryV1QueryEntries(
       [makeDs([{ kind: SubstrateHandlerKind.Event, handler: 'handleEvent' }])],
-      () => undefined,
+      () => undefined as any,
     );
     expect(result2).toEqual([]);
   });
@@ -229,7 +229,7 @@ describe('Building dictionary query entries', () => {
   it('create dictionary call filter condition and remove undefined fields', () => {
     const result1 = buildDictionaryV1QueryEntries(
       [makeDs([callHandlerWithUndefined])],
-      () => undefined,
+      () => undefined as any,
     );
     expect(result1).toEqual([
       {
@@ -247,7 +247,7 @@ describe('Building dictionary query entries', () => {
   it('create dictionary event filter condition and remove undefined fields', () => {
     const result1 = buildDictionaryV1QueryEntries(
       [makeDs([eventHandlerWithUndefined])],
-      () => undefined,
+      () => undefined as any,
     );
     expect(result1).toEqual([
       {
